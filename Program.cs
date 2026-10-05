@@ -1,45 +1,41 @@
-using System;
-using System.Windows.Forms;
+using DotnetCalc;
 
-namespace DotnetCalc;
-
-static class Program
+/// <summary>
+/// Entry point for the calculator command-line application.
+/// </summary>
+internal static class Program
 {
-    [STAThread]
-    static void Main()
+    /// <summary>
+    /// Execute the calculator with command-line arguments.
+    /// </summary>
+    /// <param name="args">The first number, second number, and operator.</param>
+    /// <returns>A process exit code.</returns>
+    private static int Main(string[] args)
     {
-        ApplicationConfiguration.Initialize();
-        
-        var form = new Form { Text = "Calculator", Width = 300, Height = 250 };
-        
-        var input1 = new TextBox { Top = 20, Left = 20, Width = 200, PlaceholderText = "Enter first number" };
-        var input2 = new TextBox { Top = 60, Left = 20, Width = 200, PlaceholderText = "Enter second number" };
-        
-        var btnAdd = new Button { Text = "+", Top = 100, Left = 20, Width = 50 };
-        var btnSubtract = new Button { Text = "-", Top = 100, Left = 80, Width = 50 };
-        
-        var lblResult = new Label { Text = "Result: ", Top = 150, Left = 20, Width = 250 };
+        if (args.Length != 3)
+        {
+            Console.Error.WriteLine("Usage: dotnet run --project DotnetCalc.csproj -- <number1> <number2> <operator>");
+            return 1;
+        }
+
+        if (!double.TryParse(args[0], out var firstNumber) || !double.TryParse(args[1], out var secondNumber))
+        {
+            Console.Error.WriteLine("Both operands must be valid numbers.");
+            return 1;
+        }
 
         var engine = new CalculatorEngine();
 
-        void ExecuteMath(string operation)
+        try
         {
-            double a = double.Parse(input1.Text);
-            double b = double.Parse(input2.Text);
-            
-            double result = engine.Calculate(a, b, operation);
-            lblResult.Text = $"Result: {result}";
+            var result = engine.Calculate(firstNumber, secondNumber, args[2]);
+            Console.WriteLine(result);
+            return 0;
         }
-
-        btnAdd.Click += (sender, e) => ExecuteMath("+");
-        btnSubtract.Click += (sender, e) => ExecuteMath("-");
-
-        form.Controls.Add(input1);
-        form.Controls.Add(input2);
-        form.Controls.Add(btnAdd);
-        form.Controls.Add(btnSubtract);
-        form.Controls.Add(lblResult);
-
-        Application.Run(form.Show());
+        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException or DivideByZeroException)
+        {
+            Console.Error.WriteLine(ex.Message);
+            return 1;
+        }
     }
 }
