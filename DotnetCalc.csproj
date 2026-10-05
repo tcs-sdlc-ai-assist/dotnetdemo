@@ -5,4 +5,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="DotnetCalc.Tests/**/*.cs" />
+    <None Include="DotnetCalc.Tests/**/*.cs" />
+  </ItemGroup>
 </Project>
